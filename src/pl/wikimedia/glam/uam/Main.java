@@ -1,4 +1,4 @@
-package pl.wikimedia;
+package pl.wikimedia.glam.uam;
 
 import java.io.BufferedReader;
 import java.io.IOException;
