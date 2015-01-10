@@ -29,10 +29,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.login.FailedLoginException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.wikipedia.Wiki;
 
 /**
  * Main class
@@ -40,15 +42,45 @@ import org.jsoup.select.Elements;
  */
 public class Main {
 
+  static boolean UPLOAD = false;
+  
   /**
    * Main program
    *
    * @param args args
    */
   public static void main(String[] args) {
+    
+    if(args.length > 0 && args[0].equals("upload"))
+      UPLOAD = true;
+    
     System.out.println("\n*************************************************************************");
     System.out.println(" WMPL GLAM Upload Tool\n Cyfrowe Archiwum im. Jozefa Burszty ");
     System.out.println("*************************************************************************");
+
+    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+
+    if (UPLOAD) {
+      for (;;) {
+        try {
+          System.out.print("\n > User: ");
+          String user;
+          user = bufferRead.readLine();
+          System.out.print(" > Password: ");
+          String password = bufferRead.readLine();
+
+          System.out.print("\n[.] Logging in...");
+          Wiki wiki = new Wiki("commons.wikimedia.org");
+          wiki.login(user, password);
+          System.out.print(" OK!\n");
+          break;
+        } catch (IOException ex) {
+          System.out.println("[!] Error!");
+        } catch (FailedLoginException ex) {
+          System.out.println("\n[!] Could not login. Wrong password?");
+        }
+      }
+    }
 
     System.out.println("\n Enter single photo ID (eg. 113), range (eg. 300-310) to process files.");
     System.out.println(" Enter 0 for exit.");
@@ -57,7 +89,7 @@ public class Main {
       System.out.print("\n > ");
 
       try {
-        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+
         String text = bufferRead.readLine();
 
         if (text.equals("0")) {
@@ -70,7 +102,7 @@ public class Main {
           int min = Integer.parseInt(range[0]);
           int max = Integer.parseInt(range[1]);
 
-          for (; min < max+1; ++min) {
+          for (; min < max + 1; ++min) {
             System.out.println(getPhotoDesc(min));
           }
 
