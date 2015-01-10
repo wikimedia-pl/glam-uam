@@ -51,19 +51,35 @@ public class Main {
     System.out.println(" WMPL GLAM Upload Tool\n Cyfrowe Archiwum im. Jozefa Burszty ");
     System.out.println("*************************************************************************");
 
+    System.out.println("\n Enter single photo ID (eg. 113), range (eg. 300-310) to process files.");
+    System.out.println(" Enter 0 for exit.");
+    
     for (;;) {
-      System.out.print("\n > Enter photo ID (0 for close program): ");
+      System.out.print("\n > ");
 
       try {
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
         String text = bufferRead.readLine();
 
         if (text.equals("0")) {
+          // exit 
           System.exit(0);
-        }
 
-        int number = Integer.parseInt(text);
-        System.out.println(getPhotoDesc(number));
+        } else if (text.matches("[0-9]* ?- ?[0-9]*")) {
+          // range
+          String[] range = text.split("-");
+          int min = Integer.parseInt(range[0]);
+          int max = Integer.parseInt(range[1]);
+
+          for (; min < max+1; ++min) {
+            System.out.println(getPhotoDesc(min));
+          }
+
+        } else {
+          // one image
+          int number = Integer.parseInt(text);
+          System.out.println(getPhotoDesc(number));
+        }
 
       } catch (NumberFormatException ex) {
         System.out.println("[!] Could not parse as a number.");
@@ -82,7 +98,7 @@ public class Main {
   static String getPhotoDesc(int id) {
     Document doc;
     try {
-      System.out.println("[.] Getting data...");
+      System.out.println("[" + id + "] Getting data...");
       doc = Jsoup.connect("http://cyfrowearchiwum.amu.edu.pl/archive_ajax/" + id).get();
 
       Photo photo = new Photo(id);
@@ -102,7 +118,12 @@ public class Main {
 
       elem = doc.select(".metadata .Rok").get(0);
       elem_ = doc.select(".metadata .description").get(0);
-      photo.setDate(elem_.text().startsWith("Zdjęcie wykonane ") ? elem_.text() : elem.text());
+      if (elem_.text().matches("Zdjęcie wykonan[eo] .* r\\.")) {
+        photo.setDate(elem_.text());
+      } else {
+        photo.setDate(elem.text());
+        photo.setComment(elem_.text());
+      }
 
       elem = doc.select(".metadata .Lokacja").get(0);
       photo.setLocation(elem.text());
@@ -114,7 +135,7 @@ public class Main {
       photo.setTitle(elem.text());
 
       // result
-      System.out.println("[.] Result:");
+      System.out.println("[" + id + "] Result:");
       System.out.println("\nFile:" + photo.getName() + "\n");
       return photo.getWikiText();
 
@@ -128,7 +149,7 @@ public class Main {
 
 /**
  * Class containing information about photo
- * 
+ *
  */
 class Photo {
 
@@ -137,6 +158,7 @@ class Photo {
 
   String accession_number = "";
   String author = "";
+  String comment = "";
   String date = "";
   String location = "";
   String title = "";
@@ -157,18 +179,27 @@ class Photo {
     author = _author.startsWith("Autor: ") ? _author.substring(7) : _author;
   }
 
+  public void setComment(String _comment) {
+    if(!_comment.isEmpty())
+      comment = "{{pl|" + _comment + "}}";
+  }
+
   public void setDate(String _date) {
     String d;
 
     if (_date.startsWith("Rok:")) {
       d = _date.substring(4);
-    } else if (_date.startsWith("Zdjęcie wykonane ")) {
+    } else if (_date.startsWith("Zdjęcie wykonan")) {
       d = _date.substring(17);
     } else {
       d = _date;
     }
 
-    date = d;
+    if (d.endsWith("r.")) {
+      d = d.replace("r.", "");
+    }
+
+    date = d.trim();
   }
 
   public void setLocation(String _location) {
@@ -204,7 +235,7 @@ class Photo {
             + " |description        = \n"
             + " |depicted people    = \n"
             + " |depicted place     = " + location + "\n"
-            + " |date               = " + date + "\n"
+            + " |date               = " + parseDate(date) + "\n"
             + " |medium             = {{technique|photo}}\n"
             + " |dimensions         = \n"
             + " |institution        = {{Institution:Institute of Ethnology and Cultural Anthropology, Adam Mickiewicz University}}\n"
@@ -213,12 +244,12 @@ class Photo {
             + " |exhibition history = \n"
             + " |credit line        = \n"
             + " |inscriptions       = \n"
-            + " |notes              = \n"
+            + " |notes              = " + comment + "\n"
             + " |accession number   = " + accession_number + "\n"
             + " |source             = http://cyfrowearchiwum.amu.edu.pl/archive/" + id + "\n"
             + " |permission         = \n"
             + " |other_versions     = \n"
-            + "}}";
+            + "}}\n";
 
     text = text.replaceAll(" +", " ");
 
@@ -227,8 +258,36 @@ class Photo {
 
   // other
   //
-  String parseDate() {
-    return "";
+  String parseDate(String date) {
+    // date month year
+    if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
+      String[] dates = date.split(" ");
+      
+      if (dates[0].length() == 1)
+        dates[0] = "0" + dates[0];
+      
+      return dates[2] + "-" + parseMonth(dates[1]) + "-" + dates[0];
+    }
+    return date;
+  }
+
+  String parseMonth(String month) {
+    String m = "??";
+    switch (month) {
+      case "I": m = "01"; break;
+      case "II": m = "02"; break;
+      case "III": m = "03"; break;
+      case "IV": m = "04"; break;
+      case "V": m = "05"; break;
+      case "VI": m = "06"; break;
+      case "VII":  m = "07"; break;
+      case "VIII":  m = "08"; break;
+      case "IX":  m = "09"; break;
+      case "X":  m = "10"; break;
+      case "XI": m = "11"; break;
+      case "XII": m = "12"; break;
+    }
+    return m;
   }
 
 }
