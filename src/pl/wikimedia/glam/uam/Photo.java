@@ -24,11 +24,19 @@
 
 package pl.wikimedia.glam.uam;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -83,7 +91,7 @@ class Photo {
 
     date = d.trim();
   }
-
+ 
   public void setLocation(String _location) {
     location = _location.startsWith("Lokacja:") ? _location.substring(8) : _location;
   }
@@ -104,23 +112,6 @@ class Photo {
 
   // gets  
   //
-  String getDate() {
-    // date month year
-    if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
-      String[] dates = date.split(" ");
-      if (dates[0].length() == 1) {
-        dates[0] = "0" + dates[0];
-      }
-      return dates[2] + "-" + parseMonth(dates[1]) + "-" + dates[0];
-
-    } else if (date.matches("[0-9]{1,2}\\-[0-9]{1,2}\\-[0-9]{4}")) {
-      String[] dates = date.split("-");
-      return dates[2] + "-" + dates[1] + "-" + dates[0];
-
-    }
-    return date;
-  }
-
   String getCategories() {
     Categories categories = new Categories();
     String text = "";
@@ -129,6 +120,9 @@ class Photo {
       tags.set(i, categories.get(tags.get(i)));
     }
 
+    if(!getCity().isEmpty())
+      tags.add(getCity());
+    
     HashSet hs = new HashSet();
     hs.addAll(tags);
     tags.clear();
@@ -145,12 +139,53 @@ class Photo {
       }
     }
 
+    if (text.isEmpty()) {
+      text += "{{subst:unc}}";
+    }
+
     return text;
+  }
+  
+  String getCity() {
+    String[] loc = location.split(",");
+    return loc[0];
+  }
+  
+  String getDate() {
+    // date month year
+    if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
+      String[] dates = date.split(" ");
+      if (dates[0].length() == 1) {
+        dates[0] = "0" + dates[0];
+      }
+      return dates[2] + "-" + parseMonth(dates[1]) + "-" + dates[0];
+
+    } else if (date.matches("[0-9]{1,2}\\-[0-9]{1,2}\\-[0-9]{4}")) {
+      String[] dates = date.split("-");
+      return dates[2] + "-" + dates[1] + "-" + dates[0];
+
+    }
+    return date;
+  }
+  
+  File getFile() {
+    File f = null;
+    try {
+      URL url = new URL(path);
+      BufferedImage bi = ImageIO.read(url);
+      f = new File("temp.jpg");
+      ImageIO.write(bi, "jpg", f);
+      
+    } catch (MalformedURLException ex) {
+      Logger.getLogger(Photo.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (IOException ex) {
+      Logger.getLogger(Photo.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return f;
   }
 
   public String getName() {
-    String[] loc = location.split(",");
-    return loc[0] + " - " + title + " (" + accession_number + ").jpg";
+    return getCity() + " - " + title + " (" + accession_number + ").jpg";
   }
 
   public String getWikiText() {

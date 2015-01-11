@@ -24,11 +24,13 @@
 package pl.wikimedia.glam.uam;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.login.LoginException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -42,6 +44,8 @@ import org.wikipedia.Wiki;
 public class Main {
 
   static boolean UPLOAD = false;
+  static boolean TEST = false;
+  static Wiki wiki = new Wiki("commons.wikimedia.org");
 
   /**
    * Main program
@@ -50,12 +54,18 @@ public class Main {
    */
   public static void main(String[] args) {
 
-    if (args.length > 0 && args[0].equals("upload")) {
-      UPLOAD = true;
+    for (int i = 0; i < args.length; ++i) {
+      if (args[i].equals("upload")) {
+        UPLOAD = true;
+      }
+      if (args[i].equals("test")) {
+        TEST = true;
+        wiki = new Wiki("test.wikipedia.org");
+      }
     }
 
     System.out.println("\n*************************************************************************");
-    System.out.println(" WMPL GLAM Upload Tool\n Cyfrowe Archiwum im. Jozefa Burszty ");
+    System.out.println(" WMPL GLAM Upload Tool\n Cyfrowe Archiwum im. Jozefa Burszty\n https://github.com/wikimedia-pl/glam-uam ");
     System.out.println("*************************************************************************");
 
     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
@@ -70,7 +80,6 @@ public class Main {
           String password = bufferRead.readLine();
 
           System.out.print("\n[.] Logging in...");
-          Wiki wiki = new Wiki("commons.wikimedia.org");
           wiki.login(user, password);
           System.out.print(" OK!\n");
           break;
@@ -81,7 +90,7 @@ public class Main {
         }
       }
     }
-
+    
     System.out.println("\n Enter single photo ID (eg. 113), range (eg. 300-310) to process files.");
     System.out.println(" Enter 0 for exit.");
 
@@ -103,13 +112,13 @@ public class Main {
           int max = Integer.parseInt(range[1]);
 
           for (; min < max + 1; ++min) {
-            System.out.println(getPhotoDesc(min));
+            getPhoto(min);
           }
 
         } else {
           // one image
           int number = Integer.parseInt(text);
-          System.out.println(getPhotoDesc(number));
+          getPhoto(number);
         }
 
       } catch (NumberFormatException ex) {
@@ -126,7 +135,7 @@ public class Main {
    * @param id photo ID
    * @return photo desc in wikicode
    */
-  static String getPhotoDesc(int id) {
+  static void getPhoto(int id) {
     Document doc;
     try {
       System.out.println("[" + id + "] Getting data...");
@@ -166,14 +175,21 @@ public class Main {
       photo.setTitle(elem.text());
 
       // result
-      System.out.println("[" + id + "] Result:");
-      System.out.println("\nFile:" + photo.getName() + "\n");
-      return photo.getWikiText();
+      System.out.println("[" + id + "] Parsed as File:" + photo.getName());
+
+      if (UPLOAD) {
+        File f = photo.getFile();
+        System.out.println("[" + id + "] File downloaded. Uploading...");
+        wiki.upload(f, photo.getName(), photo.getWikiText(), "import test");
+        System.out.println("[" + id + "] OK!\n");
+      } else {
+        System.out.println("\n" + photo.getWikiText());
+      }
 
     } catch (IOException ex) {
       System.out.println("[!] Could not get data. Probably this ID is not used.");
+    } catch (LoginException ex) {
+      System.out.println("[!] Could not upload file!\n");
     }
-    System.out.println("[!] Error!");
-    return "";
   }
 }
