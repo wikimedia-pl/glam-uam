@@ -1,5 +1,7 @@
 ## glam-uam
-This tool is created for uploading images from [Józef Burszta Digital Archives](http://cyfrowearchiwum.amu.edu.pl/). It is part of GLAM cooperation with Institute of Ethnology and Cultural Anthropology at Adam Mickiewicz University. More information you can find on [Wikimedia Commons project page](https://commons.wikimedia.org/wiki/Commons:Institute_of_Ethnology_and_Cultural_Anthropology,_Adam_Mickiewicz_University).
+![Wiki GLAM](http://i.imgur.com/QSVxZfL.png)
+
+This tool is created for uploading images from [Józef Burszta Digital Archives](http://cyfrowearchiwum.amu.edu.pl/archive). It is part of GLAM cooperation with Institute of Ethnology and Cultural Anthropology at Adam Mickiewicz University. More information you can find on [Wikimedia Commons project page](https://commons.wikimedia.org/wiki/Commons:Institute_of_Ethnology_and_Cultural_Anthropology,_Adam_Mickiewicz_University).
 
 #### how to run
 
