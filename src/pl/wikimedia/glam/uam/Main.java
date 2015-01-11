@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package pl.wikimedia.glam.uam;
 
 import java.io.BufferedReader;
@@ -43,17 +42,18 @@ import org.wikipedia.Wiki;
 public class Main {
 
   static boolean UPLOAD = false;
-  
+
   /**
    * Main program
    *
    * @param args args
    */
   public static void main(String[] args) {
-    
-    if(args.length > 0 && args[0].equals("upload"))
+
+    if (args.length > 0 && args[0].equals("upload")) {
       UPLOAD = true;
-    
+    }
+
     System.out.println("\n*************************************************************************");
     System.out.println(" WMPL GLAM Upload Tool\n Cyfrowe Archiwum im. Jozefa Burszty ");
     System.out.println("*************************************************************************");
@@ -84,7 +84,7 @@ public class Main {
 
     System.out.println("\n Enter single photo ID (eg. 113), range (eg. 300-310) to process files.");
     System.out.println(" Enter 0 for exit.");
-    
+
     for (;;) {
       System.out.print("\n > ");
 

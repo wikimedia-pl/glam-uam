@@ -45,7 +45,7 @@ class Photo {
   String title = "";
 
   ArrayList<String> tags = new ArrayList<>();
-  
+
   Photo(int _id) {
     id = _id;
   }
@@ -61,8 +61,9 @@ class Photo {
   }
 
   public void setComment(String _comment) {
-    if(!_comment.isEmpty())
+    if (!_comment.isEmpty()) {
       comment = "{{pl|" + _comment + "}}";
+    }
   }
 
   public void setDate(String _date) {
@@ -103,6 +104,50 @@ class Photo {
 
   // gets  
   //
+  String getDate() {
+    // date month year
+    if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
+      String[] dates = date.split(" ");
+      if (dates[0].length() == 1) {
+        dates[0] = "0" + dates[0];
+      }
+      return dates[2] + "-" + parseMonth(dates[1]) + "-" + dates[0];
+
+    } else if (date.matches("[0-9]{1,2}\\-[0-9]{1,2}\\-[0-9]{4}")) {
+      String[] dates = date.split("-");
+      return dates[2] + "-" + dates[1] + "-" + dates[0];
+
+    }
+    return date;
+  }
+
+  String getCategories() {
+    Categories categories = new Categories();
+    String text = "";
+
+    for (int i = 0; i < tags.size(); ++i) {
+      tags.set(i, categories.get(tags.get(i)));
+    }
+
+    HashSet hs = new HashSet();
+    hs.addAll(tags);
+    tags.clear();
+    tags.addAll(hs);
+    Collections.sort(tags);
+
+    if (getDate().matches("[0-9]{4}.*")) {
+      text += "[[Category:" + getDate().substring(0, 4) + " in Poland]]\n";
+    }
+
+    for (String tag : tags) {
+      if (!tag.trim().isEmpty()) {
+        text += "[[Category:" + tag + "]]\n";
+      }
+    }
+
+    return text;
+  }
+
   public String getName() {
     String[] loc = location.split(",");
     return loc[0] + " - " + title + " (" + accession_number + ").jpg";
@@ -116,7 +161,7 @@ class Photo {
             + " |description        = \n"
             + " |depicted people    = \n"
             + " |depicted place     = " + location + "\n"
-            + " |date               = " + parseDate(date) + "\n"
+            + " |date               = " + getDate() + "\n"
             + " |medium             = {{technique|photo}}\n"
             + " |dimensions         = \n"
             + " |institution        = {{Institution:Institute of Ethnology and Cultural Anthropology, Adam Mickiewicz University}}\n"
@@ -135,7 +180,7 @@ class Photo {
     text += "=={{int:license-header}}==\n"
             + "{{cc-by-sa-3.0-pl}}\n\n";
 
-    text += parseTags(tags);
+    text += getCategories();
     text = text.replaceAll(" +", " ");
 
     return text;
@@ -143,20 +188,6 @@ class Photo {
 
   // other
   //
-  String parseDate(String date) {
-    // date month year
-    if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
-      String[] dates = date.split(" ");
-
-      if (dates[0].length() == 1) {
-        dates[0] = "0" + dates[0];
-      }
-
-      return dates[2] + "-" + parseMonth(dates[1]) + "-" + dates[0];
-    }
-    return date;
-  }
-
   String parseMonth(String month) {
     String m = "??";
     switch (month) {
@@ -175,33 +206,14 @@ class Photo {
     }
     return m;
   }
-
-  String parseTags(ArrayList<String> tags) {
-    Categories categories = new Categories();
-    String text = "";
-
-    for (int i = 0; i < tags.size(); ++i) {
-      tags.set(i, categories.get(tags.get(i)));
-    }
-    
-    HashSet hs = new HashSet();
-    hs.addAll(tags);
-    tags.clear();
-    tags.addAll(hs);
-    Collections.sort(tags);
-
-    for (String tag : tags) {
-      if(!tag.trim().isEmpty())
-        text += "[[Category:" + tag + "]]\n";
-    }
-
-    return text;
-  }
 }
 
 class Categories {
+
   Map<String, String> map = new HashMap<>();
+
   public Categories() {
+    map.put("architektura sakralna", "Religious buildings in Poland");
     map.put("dzieci", "Children of Poland");
     map.put("folklor", "Folklore of Poland");
     map.put("narzędzia rolnicze", "Agricultural tools in Poland");
@@ -209,7 +221,7 @@ class Categories {
     map.put("rolnictwo", "Agriculture in Poland");
     map.put("sztuka ludowa", "Folk art in Poland");
   }
-  
+
   public String get(String key) {
     String value = map.get(key);
     return value == null ? "" : value;
