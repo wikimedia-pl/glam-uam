@@ -90,7 +90,7 @@ public class Main {
         }
       }
     }
-    
+
     System.out.println("\n Enter single photo ID (eg. 113), range (eg. 300-310) to process files.");
     System.out.println(" Enter 0 for exit.");
 
@@ -156,12 +156,13 @@ public class Main {
       elem = doc.select(".metadata .author").get(0);
       photo.setAuthor(elem.text());
 
-      elem = doc.select(".metadata .Rok").get(0);
+      elems = doc.select(".metadata .Rok");
+      elem = elems.isEmpty() ? null : elems.get(0);
       elem_ = doc.select(".metadata .description").get(0);
       if (elem_.text().matches("Zdjęcie wykonan[eo] .* r\\.")) {
         photo.setDate(elem_.text());
       } else {
-        photo.setDate(elem.text());
+        photo.setDate(elem == null ? "" : elem.text());
         photo.setComment(elem_.text());
       }
 

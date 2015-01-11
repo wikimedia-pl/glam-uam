@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package pl.wikimedia.glam.uam;
 
 import java.awt.image.BufferedImage;
@@ -91,9 +90,11 @@ class Photo {
 
     date = d.trim();
   }
- 
+
   public void setLocation(String _location) {
-    location = _location.startsWith("Lokacja:") ? _location.substring(8) : _location;
+    if (!_location.contains("nieznane")) {
+      location = _location.startsWith("Lokacja:") ? _location.substring(8) : _location;
+    }
   }
 
   public void setPath(String _path) {
@@ -120,9 +121,10 @@ class Photo {
       tags.set(i, categories.get(tags.get(i)));
     }
 
-    if(!getCity().isEmpty())
+    if (!getCity().isEmpty()) {
       tags.add(getCity());
-    
+    }
+
     HashSet hs = new HashSet();
     hs.addAll(tags);
     tags.clear();
@@ -145,12 +147,12 @@ class Photo {
 
     return text;
   }
-  
+
   String getCity() {
     String[] loc = location.split(",");
     return loc[0];
   }
-  
+
   String getDate() {
     // date month year
     if (date.matches("[0-9]{1,2} [IVX]{1,5} [0-9]{4}")) {
@@ -167,7 +169,7 @@ class Photo {
     }
     return date;
   }
-  
+
   File getFile() {
     File f = null;
     try {
@@ -175,7 +177,7 @@ class Photo {
       BufferedImage bi = ImageIO.read(url);
       f = new File("temp.jpg");
       ImageIO.write(bi, "jpg", f);
-      
+
     } catch (MalformedURLException ex) {
       Logger.getLogger(Photo.class.getName()).log(Level.SEVERE, null, ex);
     } catch (IOException ex) {
