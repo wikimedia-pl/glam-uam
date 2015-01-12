@@ -12,7 +12,11 @@ For read-only purposes (eg. checking if everything is parsed well):
 For upload:
 
     java -jar store/glam-uam.jar upload
-  
+
+For test upload (will use `test.wikipedia.org` API):
+
+    java -jar store/glam-uam.jar upload test
+
 #### license
 ```
 The MIT License (MIT)
