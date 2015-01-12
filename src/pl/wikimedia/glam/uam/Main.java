@@ -27,6 +27,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.login.FailedLoginException;
@@ -45,7 +47,11 @@ public class Main {
 
   static boolean UPLOAD = false;
   static boolean TEST = false;
+  
   static Wiki wiki = new Wiki("commons.wikimedia.org");
+  static String user;
+  
+  static String log = "";
 
   /**
    * Main program
@@ -74,7 +80,6 @@ public class Main {
       for (;;) {
         try {
           System.out.print("\n > User: ");
-          String user;
           user = bufferRead.readLine();
           System.out.print(" > Password: ");
           String password = bufferRead.readLine();
@@ -98,9 +103,8 @@ public class Main {
       System.out.print("\n > ");
 
       try {
-
         String text = bufferRead.readLine();
-
+        
         if (text.equals("0")) {
           // exit 
           System.exit(0);
@@ -121,10 +125,18 @@ public class Main {
           getPhoto(number);
         }
 
+        if (UPLOAD) {
+          System.out.print("[.] Saving log...");
+          wiki.newSection("User:" + user + "/Józef Burszta Digital Archives", "", log, false, true);
+          System.out.print(" OK!\n");
+        }
+
       } catch (NumberFormatException ex) {
         System.out.println("[!] Could not parse as a number.");
       } catch (IOException ex) {
-        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        System.out.println("[!] Womething went wrong!");
+      } catch (LoginException ex) {
+        System.out.println("[!] Not logged in");
       }
     }
   }
@@ -183,6 +195,16 @@ public class Main {
         System.out.println("[" + id + "] File downloaded. Uploading...");
         wiki.upload(f, photo.getName(), photo.getWikiText(), "import test");
         System.out.println("[" + id + "] OK!\n");
+
+        log += "# [" + id + "] [[:File:" + photo.getName() + "]]\n";
+        log += "#: Categories: ";
+        
+        if(photo.getCategories().contains("subst:unc"))
+          log += "'''no categories'''";
+        else
+          log += photo.getCategories().replaceAll("\\[\\[Category:", "\\[\\[:Category:").replaceAll("]]", "|]]").replaceAll("\n", ", ");
+        
+        log += "\n";
       } else {
         System.out.println("\n" + photo.getWikiText());
       }

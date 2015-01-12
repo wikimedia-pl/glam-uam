@@ -113,7 +113,7 @@ class Photo {
 
   // gets  
   //
-  String getCategories() {
+  public String getCategories() {
     Categories categories = new Categories();
     String text = "";
 
@@ -187,7 +187,9 @@ class Photo {
   }
 
   public String getName() {
-    return getCity() + " - " + title + " (" + accession_number + ").jpg";
+    return getCity().isEmpty()
+            ? title + " (" + accession_number + ").jpg"
+            : getCity() + " - " + title + " (" + accession_number + ").jpg";
   }
 
   public String getWikiText() {
