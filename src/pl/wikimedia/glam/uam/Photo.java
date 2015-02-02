@@ -253,11 +253,13 @@ class Categories {
 
   public Categories() {
     map.put("architektura sakralna", "Religious buildings in Poland");
+    map.put("budownictwo", "Buildings in Poland");
     map.put("dzieci", "Children of Poland");
     map.put("folklor", "Folklore of Poland");
     map.put("narzędzia rolnicze", "Agricultural tools in Poland");
     map.put("rękodzieło", "Folk art in Poland");
     map.put("rolnictwo", "Agriculture in Poland");
+    map.put("strój ludowy", "Folk national costumes of Poland");
     map.put("sztuka ludowa", "Folk art in Poland");
   }
 
