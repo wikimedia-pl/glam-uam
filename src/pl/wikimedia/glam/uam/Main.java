@@ -102,23 +102,11 @@ public class Main {
         String text = bufferRead.readLine();
         
         if (text.equals("0")) {
-          // exit 
           System.exit(0);
-
         } else if (text.matches("[0-9]* ?- ?[0-9]*")) {
-          // range
-          String[] range = text.split("-");
-          int min = Integer.parseInt(range[0]);
-          int max = Integer.parseInt(range[1]);
-
-          for (; min < max + 1; ++min) {
-            getPhoto(min);
-          }
-
+          getMultiplePhotos(text);
         } else {
-          // one image
-          int number = Integer.parseInt(text);
-          getPhoto(number);
+          getSinglePhoto(text);
         }
 
         if (UPLOAD) {
@@ -134,6 +122,21 @@ public class Main {
       } catch (LoginException ex) {
         System.out.println("[!] Not logged in");
       }
+    }
+  }
+  
+  private static void getSinglePhoto(String text) {
+    int number = Integer.parseInt(text);
+    getPhoto(number);
+  }
+  
+  private static void getMultiplePhotos(String text) {
+    String[] range = text.split("-");
+    int min = Integer.parseInt(range[0]);
+    int max = Integer.parseInt(range[1]);
+
+    for (; min < max + 1; ++min) {
+      getPhoto(min);
     }
   }
 
@@ -155,7 +158,7 @@ public class Main {
       Elements elems;
 
       elem = doc.select(".file a").get(0);
-      photo.setPath(elem.attr("href"));
+      photo.setPath(elem.attr("onclick"));
 
       // data
       elem = doc.select(".metadata .nr_invent").get(0);
@@ -189,7 +192,7 @@ public class Main {
       if (UPLOAD) {
         File f = photo.getFile();
         System.out.println("[" + id + "] File downloaded. Uploading...");
-        wiki.upload(f, photo.getName(), photo.getWikiText(), "import test");
+        wiki.upload(f, photo.getName(), photo.getWikiText(), "import");
         System.out.println("[" + id + "] OK!\n");
 
         log += "# [" + id + "] [[:File:" + photo.getName() + "]]\n";
