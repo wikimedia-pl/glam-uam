@@ -98,7 +98,7 @@ class Photo {
   }
 
   public void setPath(String _path) {
-    path = "http://cyfrowearchiwum.amu.edu.pl" + _path;
+    path = "http://cyfrowearchiwum.amu.edu.pl" + _path.replace("window.open('", "").replace("','_blank');", "");
   }
 
   public void setTags(Elements _elems) {
@@ -108,7 +108,9 @@ class Photo {
   }
 
   public void setTitle(String _title) {
-    title = _title;
+    if(!_title.equals("brak")) {
+      title = _title;
+    }
   }
 
   // gets  
@@ -117,6 +119,17 @@ class Photo {
     Categories categories = new Categories();
     String text = "";
 
+    String country = "Poland";
+    if(tags.contains("afganistan")) {
+      country = "Afghanistan";
+    } else if(tags.contains("afryka")) {
+      country = "Africa";
+    } else if(tags.contains("azja")) {
+      country = "Asia";
+    } else if(tags.contains("bałkany")) {
+      country = "the Balkans";
+    }
+    
     for (int i = 0; i < tags.size(); ++i) {
       tags.set(i, categories.get(tags.get(i)));
     }
@@ -130,21 +143,23 @@ class Photo {
     tags.clear();
     tags.addAll(hs);
     Collections.sort(tags);
-
+    
     if (getDate().matches("[0-9]{4}.*")) {
-      text += "[[Category:" + getDate().substring(0, 4) + " in Poland]]\n";
+      text += "[[Category:" + getDate().substring(0, 4) + " in " + country + "]]\n";
     }
 
     for (String tag : tags) {
       if (!tag.trim().isEmpty()) {
-        text += "[[Category:" + tag + "]]\n";
+        text += tag.equals(getCity()) ?
+                "[[Category:" + tag + "]]\n" :
+                "[[Category:" + tag + " " + country + "]]\n";
       }
     }
 
     if (text.isEmpty()) {
       text += "{{subst:unc}}";
     }
-
+    
     return text;
   }
 
@@ -169,6 +184,10 @@ class Photo {
     }
     return date;
   }
+  
+  String getTitle() {
+    return title.isEmpty() ? "" : "{{pl|" + title + ".}}";
+  }
 
   File getFile() {
     File f = null;
@@ -187,19 +206,27 @@ class Photo {
   }
 
   public String getName() {
-    return getCity().isEmpty()
-            ? title + " (" + accession_number + ").jpg"
-            : getCity() + " - " + title + " (" + accession_number + ").jpg";
+    String text = "";
+    
+    if(!title.isEmpty()) {
+      text += title + " - ";
+    }
+    if(!getCity().isEmpty()) {
+      text += getCity() + " - ";
+    }
+    text += accession_number + ".jpg";
+    
+    return text;
   }
 
   public String getWikiText() {
     String text = "=={{int:filedesc}}==\n"
             + "{{Photograph\n"
-            + " |photographer       = " + author + "\n"
-            + " |title              = {{pl|" + title + ".}}\n"
+            + " |photographer       = {{pl|" + author + "}}\n"
+            + " |title              = " + getTitle() + "\n"
             + " |description        = \n"
             + " |depicted people    = \n"
-            + " |depicted place     = " + location + "\n"
+            + " |depicted place     = {{pl|" + location + "}}\n"
             + " |date               = " + getDate() + "\n"
             + " |medium             = {{technique|photo}}\n"
             + " |dimensions         = \n"
@@ -217,7 +244,9 @@ class Photo {
             + "}}\n\n";
 
     text += "=={{int:license-header}}==\n"
-            + "{{cc-by-sa-3.0-pl}}\n\n";
+            + "{{cc-by-sa-3.0-pl}}\n"
+            + "{{Institute of Ethnology and Cultural Anthropology, Adam Mickiewicz University partnership}}\n"
+            + "{{subst:chc}}\n\n";
 
     text += getCategories();
     text = text.replaceAll(" +", " ");
@@ -252,15 +281,16 @@ class Categories {
   Map<String, String> map = new HashMap<>();
 
   public Categories() {
-    map.put("architektura sakralna", "Religious buildings in Poland");
-    map.put("budownictwo", "Buildings in Poland");
-    map.put("dzieci", "Children of Poland");
-    map.put("folklor", "Folklore of Poland");
-    map.put("narzędzia rolnicze", "Agricultural tools in Poland");
-    map.put("rękodzieło", "Folk art in Poland");
-    map.put("rolnictwo", "Agriculture in Poland");
-    map.put("strój ludowy", "Folk national costumes of Poland");
-    map.put("sztuka ludowa", "Folk art in Poland");
+    map.put("architektura sakralna", "Religious buildings in");
+    map.put("budownictwo", "Buildings in");
+    map.put("dzieci", "Children of");
+    map.put("folklor", "Folklore of");
+    map.put("kobiety", "Women of");
+    map.put("narzędzia rolnicze", "Agricultural tools in");
+    map.put("rękodzieło", "Folk art in");
+    map.put("rolnictwo", "Agriculture in");
+    map.put("strój ludowy", "Folk national costumes of");
+    map.put("sztuka ludowa", "Folk art in");
   }
 
   public String get(String key) {
