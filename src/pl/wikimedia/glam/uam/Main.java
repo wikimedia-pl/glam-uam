@@ -82,6 +82,8 @@ public class Main {
 
           System.out.print("\n[.] Logging in...");
           wiki.login(user, password);
+          wiki.setUserAgent("WMPL GLAM Upload Tool/1.0 (https://github.com/wikimedia-pl/glam-uam)");
+          wiki.setMarkBot(true);
           System.out.print(" OK!\n");
           break;
         } catch (IOException ex) {
