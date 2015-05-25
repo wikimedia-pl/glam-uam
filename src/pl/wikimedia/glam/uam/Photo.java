@@ -249,8 +249,9 @@ class Photo {
             + "{{subst:chc}}\n\n";
 
     text += getCategories();
+    text += "[[Category:Images from Józef Burszta Digital Archives – needing category checks]]\n";
+    
     text = text.replaceAll(" +", " ");
-
     return text;
   }
 
