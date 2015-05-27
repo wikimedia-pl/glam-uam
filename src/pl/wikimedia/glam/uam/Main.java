@@ -159,7 +159,12 @@ public class Main {
       Element elem_;
       Elements elems;
 
-      elem = doc.select(".file a").get(0);
+      elems = doc.select(".file a");
+      if(elems.isEmpty()) {
+        throw new IOException();
+      }
+      elem = elems.get(0);
+      
       photo.setPath(elem.attr("onclick"));
 
       // data
