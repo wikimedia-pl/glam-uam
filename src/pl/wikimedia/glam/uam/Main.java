@@ -184,8 +184,10 @@ public class Main {
         photo.setComment(elem_.text());
       }
 
-      elem = doc.select(".metadata .Lokacja").get(0);
-      photo.setLocation(elem.text());
+      elems = doc.select(".metadata .Lokacja");
+      if(!elems.isEmpty()) {
+        photo.setLocation(elems.get(0).text());
+      }
 
       elems = doc.select(".metadata .Tagi a");
       photo.setTags(elems);
@@ -216,7 +218,7 @@ public class Main {
       }
 
     } catch (IOException ex) {
-      System.out.println("[!] Could not get data. Probably this ID is not used.");
+      System.out.println("[!] Could not get data. Probably this ID is not used.\n");
     } catch (LoginException ex) {
       System.out.println("[!] Could not upload file!\n");
     }
